@@ -20,22 +20,7 @@ export default function transformWebhook(
     text: '',
   };
 
-  // Because these stages are processed sequentially, not all formats may be
-  // handled nicely. TODO: Allow enforcing a specific format by postfixing
-  // the webhook URL with that format, e.g. /hook/<id>/slack
-  if (is<Turt2liveWebhook>(webhook)) {
-    if (webhook.format === 'html') {
-      content.text = {
-        formatHtml: () => webhook.text,
-        // We could try to transform HTML tags to ASCII pseudo-formatting here.
-        // For now, we'll just strip the HTML tags.
-        formatPlain: () => HTMLParser.parse(webhook.text).text,
-      };
-    } else {
-      content.text = textTransform(webhook.text);
-    }
-    content.username = webhook.displayName;
-  } else if (is<DiscordWebhook>(webhook)) {
+  if (is<DiscordWebhook>(webhook)) {
     content.text = textTransform(webhook.content);
     content.username = webhook.username;
     if (webhook.avatar_url) {
@@ -52,7 +37,17 @@ export default function transformWebhook(
   } else if (is<AppriseJsonWebhook_Unknown>(webhook)) {
     content.text = textTransform(webhook.message);
   } else if (is<SlackWebhook>(webhook)) {
-    content.text = textTransform(webhook.text);
+    let text = webhook.text
+    if (webhook.attachments) {
+      text += "\n"
+      webhook.attachments.forEach(v => {
+        if (v.text) {
+          text += v.text
+        }
+      })
+    }
+    content.text = textTransform(text);
+
     if (webhook.mrkdwn) {
       logger.debug(
         'Received a markdown-formatted webhook, but markdown is not supported.',

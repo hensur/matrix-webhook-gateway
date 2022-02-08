@@ -22,6 +22,7 @@ export default class WebhookListener {
     await this.webhookMatcher.load();
 
     this.app.use(Express.json());
+    this.app.use(Express.urlencoded({extended: true}));
     this.app.use((
       err: Error & Record<string, unknown>,
       _rq: Request,

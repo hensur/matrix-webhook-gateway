@@ -13,7 +13,7 @@ import identity from '../util/functional';
 
 export interface Request {
   path: string,
-  body: unknown,
+  body: any,
 }
 
 export interface Match {
@@ -54,15 +54,25 @@ export default class Matcher {
   }
 
   public async executeHook(match: Match, request: Request, options: WebhookOptions): Promise<WebhookResult | undefined> {
+    let payload = request.body
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (request.body !== null && request.body.payload) {
+      try {
+        payload = JSON.parse(request.body.payload);
+      } catch (e) {
+        logger.warn(`Received an empty webhook (failed to parse payload (${request.body}: ${e}): `, payload);
+        return undefined;
+      }
+    }
     if (match.pluginName === undefined) {
-      if (is<WebhookContent>(request.body)) {
+      if (is<WebhookContent>(payload)) {
         const textTransform = options.replaceEmoji ? renderEmoji : identity;
         return {
           webhook: match.webhook,
-          content: transformWebhook(request.body, textTransform),
+          content: transformWebhook(payload, textTransform),
         };
       }
-      logger.warn('Received an unrecognised webhook: ', request.body);
+      logger.warn('Received an unrecognised webhook: ', payload);
       return undefined;
     }
 
@@ -74,7 +84,7 @@ export default class Matcher {
     logger.debug(`Invoking plugin: '${match.pluginName}'`);
     let content;
     try {
-      content = await this.plugins.apply(request.body, match.pluginName);
+      content = await this.plugins.apply(payload, match.pluginName);
     } catch (error) {
       logger.error(`Error executing plugin '${match.pluginName}'`, error);
       return undefined;
