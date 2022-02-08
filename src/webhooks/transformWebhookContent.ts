@@ -57,7 +57,16 @@ export default function transformWebhookContent(
     content.text = textTransform(webhook.message);
   } else if (is<SlackWebhook>(webhook)) {
     logger.silly('Matched Slack webhook format.');
-    content.text = textTransform(webhook.text);
+    let text = webhook.text
+    if (webhook.attachments) {
+      text += "\n"
+      webhook.attachments.forEach(v => {
+        if (v.text) {
+          text += v.text
+        }
+      })
+    }
+    content.text = textTransform(text);
     if (webhook.mrkdwn) {
       logger.debug(
         'Received a markdown-formatted webhook, but markdown is not supported.',

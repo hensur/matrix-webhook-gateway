@@ -14,6 +14,18 @@ test('transforms Slack-style webhooks', () => {
   expect(formatted).toBe('A new message');
 });
 
+test('transforms Slack-style webhooks with attachment', () => {
+  const call: SlackWebhook = {
+    text: 'A new message',
+    attachments: [{text: "test"}],
+  };
+
+  const output = transformWebhook(call, identity);
+  const formatted = toPlain(output.text);
+
+  expect(formatted).toBe('A new message\ntest');
+});
+
 test('transforms Discord-style webhooks', () => {
   const call: DiscordWebhook = {
     content: 'A new message',

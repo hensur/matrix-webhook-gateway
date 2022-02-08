@@ -19,11 +19,16 @@ export interface DiscordWebhook {
   avatar_url?: string;
 }
 
+export interface SlackAttachment {
+  text?: string;
+}
+
 export interface SlackWebhook {
   text: string;
   username?: string;
   icon_emoji?: string;
   icon_url?: string;
+  attachments?: SlackAttachment[];
   mrkdwn?: boolean;
 }
 
