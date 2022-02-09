@@ -20,29 +20,26 @@ export default function transformWebhook(
     text: '',
   };
 
-  if (is<DiscordWebhook>(webhook)) {
-    content.text = textTransform(webhook.content);
-    content.username = webhook.username;
-    if (webhook.avatar_url) {
-      content.icon = {
-        url: webhook.avatar_url,
-      };
+  if (is<SlackWebhook>(webhook)) {
+    let text = "";
+    if (webhook.text) {
+      text += webhook.text
+      if (webhook.attachments) {
+        text += "\n"
+      }
     }
-  } else if (is<AppriseJsonWebhook_1_0>(webhook)) {
-    content.text = fmt(
-      strong(`${textTransform(webhook.title)}`),
-      br(),
-      textTransform(webhook.message),
-    );
-  } else if (is<AppriseJsonWebhook_Unknown>(webhook)) {
-    content.text = textTransform(webhook.message);
-  } else if (is<SlackWebhook>(webhook)) {
-    let text = webhook.text
+    let attachmentAuthor: string | undefined;
     if (webhook.attachments) {
-      text += "\n"
       webhook.attachments.forEach(v => {
+        if (v.title) {
+          text += v.title
+          text += "\n"
+        }
         if (v.text) {
           text += v.text
+        }
+        if (v.author_name) {
+          attachmentAuthor = v.author_name;
         }
       })
     }
@@ -53,7 +50,7 @@ export default function transformWebhook(
         'Received a markdown-formatted webhook, but markdown is not supported.',
       );
     }
-    content.username = webhook.username;
+    content.username = webhook.username ? webhook.username : attachmentAuthor;
     if (webhook.icon_url) {
       content.icon = {
         url: webhook.icon_url,

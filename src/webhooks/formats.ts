@@ -21,15 +21,18 @@ export interface DiscordWebhook {
 
 export interface SlackAttachment {
   text?: string;
+  title?: string;
+  author_name?: string;
 }
 
 export interface SlackWebhook {
-  text: string;
-  username?: string;
-  icon_emoji?: string;
-  icon_url?: string;
+  text?: string | null;
+  username?: string | null;
+  channel?: string | null;
+  icon_emoji?: string | null;
+  icon_url?: string | null;
   attachments?: SlackAttachment[];
-  mrkdwn?: boolean;
+  mrkdwn?: boolean | null;
 }
 
 // We can be pretty strict about parsing v1.0; its content is well defined:
