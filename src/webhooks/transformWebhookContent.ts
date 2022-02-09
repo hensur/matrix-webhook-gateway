@@ -57,12 +57,25 @@ export default function transformWebhookContent(
     content.text = textTransform(webhook.message);
   } else if (is<SlackWebhook>(webhook)) {
     logger.silly('Matched Slack webhook format.');
-    let text = webhook.text
+    let text = "";
+    if (webhook.text) {
+      text += webhook.text
+      if (webhook.attachments) {
+        text += "\n"
+      }
+    }
+    let attachmentAuthor: string | undefined;
     if (webhook.attachments) {
-      text += "\n"
       webhook.attachments.forEach(v => {
+        if (v.title) {
+          text += v.title
+          text += "\n"
+        }
         if (v.text) {
           text += v.text
+        }
+        if (v.author_name) {
+          attachmentAuthor = v.author_name;
         }
       })
     }
@@ -72,7 +85,7 @@ export default function transformWebhookContent(
         'Received a markdown-formatted webhook, but markdown is not supported.',
       );
     }
-    content.username = webhook.username;
+    content.username = webhook.username ? webhook.username : attachmentAuthor;
     if (webhook.icon_url) {
       content.icon = {
         url: webhook.icon_url,

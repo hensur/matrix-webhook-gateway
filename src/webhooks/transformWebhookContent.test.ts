@@ -26,6 +26,20 @@ test('transforms Slack-style webhooks with attachment', () => {
   expect(formatted).toBe('A new message\ntest');
 });
 
+test('transforms Slack-style webhooks with only attachment', () => {
+  const call: any = {
+    attachments: [{title: "abc", text: "test", fallback: "test", color: "abc", author_name: "librenms"}],
+    channel: null,
+    username: null,
+    icon_emoji: null,
+  };
+
+  const output = transformWebhook(call, identity);
+  const formatted = toPlain(output.text);
+
+  expect(formatted).toBe('abc\ntest');
+});
+
 test('transforms Discord-style webhooks', () => {
   const call: DiscordWebhook = {
     content: 'A new message',
