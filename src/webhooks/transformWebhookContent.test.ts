@@ -20,7 +20,7 @@ test('transforms Slack-style webhooks with attachment', () => {
     attachments: [{text: "test"}],
   };
 
-  const output = transformWebhook(call, identity);
+  const output = transformWebhookContent(call, identity);
   const formatted = toPlain(output.text);
 
   expect(formatted).toBe('A new message\ntest');
@@ -34,7 +34,7 @@ test('transforms Slack-style webhooks with only attachment', () => {
     icon_emoji: null,
   };
 
-  const output = transformWebhook(call, identity);
+  const output = transformWebhookContent(call, identity);
   const formatted = toPlain(output.text);
 
   expect(formatted).toBe('abc\ntest');

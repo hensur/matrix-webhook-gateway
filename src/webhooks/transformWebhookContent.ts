@@ -23,7 +23,9 @@ export default function transformWebhookContent(
   // Because these stages are processed sequentially, not all formats may be
   // handled nicely. TODO: Allow enforcing a specific format by postfixing
   // the webhook URL with that format, e.g. /hook/<id>/slack
-  if (is<Turt2liveWebhook>(webhook)) {
+  // Slack payloads with attachments also satisfy the turt2live shape (text
+  // only), so leave those to the Slack branch below.
+  if (is<Turt2liveWebhook>(webhook) && !(is<SlackWebhook>(webhook) && (webhook as SlackWebhook).attachments)) {
     logger.silly('Matched turt2live webhook format.');
     if (webhook.format === 'html') {
       content.text = {

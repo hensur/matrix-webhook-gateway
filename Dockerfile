@@ -1,12 +1,12 @@
-FROM node:lts AS build
+FROM docker.io/library/node:24.22.1-bookworm AS build
 WORKDIR /build
 COPY package.json package-lock.json ./
 # This is necessary to get @vscode/sqlite3 to build.
 RUN npm ci --python=/usr/bin/python3
 COPY . ./
-RUN npx tsc --outDir out
+RUN npx tsc --outDir out && npx jest --silent
 
-FROM node:lts
+FROM docker.io/library/node:24.22.1-bookworm-slim
 WORKDIR /app
 
 ENV WEBHOOK_CONFIG /config/gateway-config.yaml
